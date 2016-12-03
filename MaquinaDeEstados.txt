@@ -1,0 +1,93 @@
+// Possíveis estados da máquina de estados.
+typedef enum {
+  ESTADO_MEDINDO,
+  ESTADO_ENVIANDO,
+  ESTADO_ESPERANDOCONFIRMACAO,
+  ESTADO_ERRO,
+} Estado;
+
+// Estado atual da máquina de estados.
+Estado estadoAtual = ESTADO_MEDINDO; // Inicia no estado de medição.
+
+boolean mediu; // Flag para indicar se o sensor obteu a frequência cardíaca.
+boolean adicionouNoBuffer; // Flag para indicar se o pacote foi adicionado no buffer.
+boolean confirmacao; // Flag para indicar se o app recebeu o pacote.
+
+void setup() {
+
+  Serial.begin(9600);
+
+  estadoAtual = ESTADO_MEDINDO;
+  mediu = false;
+  adicionouNoBuffer = false;
+  confirmacao = false;
+
+}
+
+
+void loop() {
+  switch (estadoAtual) {
+
+    case ESTADO_MEDINDO: // Medindo a frequência cardíaca.
+      {
+
+        medirFrequenciaCardiaca();
+        Serial.println("ESTADO_MEDINDO");
+        if (mediu == true) {
+          estadoAtual =  ESTADO_ENVIANDO;
+        } else {
+           // estadoAtual = ESTADO_ERRO; ou medirFrequenciaCardiaca(); ?
+        }
+        break;
+      }
+
+    case ESTADO_ENVIANDO: // Enviando a struct (pacote de informações) para o app.
+      {
+
+        Serial.println("ESTADO_ENVIANDO");
+
+        if (adicionouNoBuffer == true) {
+          // ENVIAR PACOTE.
+        } else {
+            // estadoAtual = ESTADO_ERRO ou adicionar no buffer novamente e deixar o estado no ESTADO_ENVIANDO; ?
+        }
+        break;
+      }
+
+    case ESTADO_ESPERANDOCONFIRMACAO: // Esperando receber a confirmação de que o pacote de informações foi entregue com sucesso e limpando o buffer circular.
+      {
+
+        Serial.println("ESTADO_ESPERANDOCONFIRMACAO");
+
+        if (confirmacao == true) {
+          // Apaga o elemento da última posição do buffer circular.
+        } else {
+            // estadoAtual = ESTADO_ERRO ou enviar pacote novamente?
+        }
+        break;
+      }
+
+    default: 
+    case ESTADO_ERRO:
+      {
+
+        Serial.println("ESTADO_ERRO");
+        // ENVIAR MENSAGEM DE ERRO PARA O APP.
+        break;
+      }
+
+  } // Fim do switch.
+}
+
+// Método que mede a frequência cardíaca e adiciona no buffer circular.
+void medirFrequenciaCardiaca() {
+  long tempo = millis();
+  const long tempoDeMedicao = 15000; // 15 segundos para ficar medindo a frequência cardíaca.
+
+  while (millis() - tempo <= tempoDeMedicao) {
+    // PEGA VALOR DO SENSOR
+    // ADICIONA NO BUFFER CIRCULAR
+    mediu = true;
+    delay(1);
+  }
+}
