@@ -1,0 +1,12 @@
+#ifndef _PacoteConfirmacao_H
+#define _PacoteConfirmacao_H
+
+#include <stdint.h>
+
+#endif
+
+template <class T> class PacoteConfirmacao {
+  private:
+    uint8_t id;
+    uint8_t codigo; // 0 = ok e 1 = erro
+};

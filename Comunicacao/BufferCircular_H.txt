@@ -1,0 +1,77 @@
+#ifndef _BufferCircular_H
+#define _BufferCircular_H
+
+#if (ARDUINO >= 100) 
+# include "Arduino.h"
+#else
+# include "WProgram.h"
+#endif
+
+template <class PacoteBPM> class CircularBuffer {
+    private:
+        PacoteBPM *_data;
+        uint32_t _head;
+        uint32_t _tail;
+        uint32_t _size;
+
+    public:
+        CircularBuffer(uint32_t);
+        PacoteBPM read();
+        void write(PacoteBPM);
+        int available();
+        void clear();
+        PacoteBPM getEntry(uint32_t p);
+        uint32_t getHead();
+        uint32_t getTail();
+};
+
+template <class PacoteBPM> CircularBuffer<PacoteBPM>::CircularBuffer(uint32_t size) {
+    _size = size;
+    _data = (PacoteBPM *)malloc(size * sizeof(PacoteBPM));
+    _head = 0;
+    _tail = 0;
+}
+
+template <class PacoteBPM> PacoteBPM CircularBuffer<PacoteBPM>::read() {
+    PacoteBPM chr;
+    if (_head == _tail) {
+        return 0;
+    }
+    chr = _data[_tail];
+    _tail = (_tail + 1) % _size;
+    return chr;
+}
+
+template <class PacoteBPM> void CircularBuffer<PacoteBPM>::write(PacoteBPM d) {
+    uint32_t newhead = (_head + 1) % _size;
+    if (newhead != _tail) {
+        _data[_head] = d;
+        _head = newhead;
+    }
+}
+
+template <class PacoteBPM> int CircularBuffer<PacoteBPM>::available() {
+    return (_size + _head - _tail) % _size;
+}
+
+template <class PacoteBPM> void CircularBuffer<PacoteBPM>::clear() {
+    _head = _tail = 0;
+}
+
+template <class PacoteBPM> PacoteBPM CircularBuffer<PacoteBPM>::getEntry(uint32_t p) {
+    if (p >= _size) {
+        return 0;
+    }
+    return _data[p];
+}
+
+template <class PacoteBPM> uint32_t CircularBuffer<PacoteBPM>::getHead() {
+    return _head;
+}
+
+template <class PacoteBPM> uint32_t CircularBuffer<PacoteBPM>::getTail() {
+    return _tail;
+}
+
+
+#endif
